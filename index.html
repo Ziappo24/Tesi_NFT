@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tesi NFT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <!-- Aggiungi il loader OBJ -->
     <style>
       body {
         margin: 0;
@@ -46,10 +47,10 @@
       let light = new THREE.AmbientLight(0xffffff, 1);
       scene.add(light);
 
-      let loader = new THREE.GLTFLoader();
+      let loader = new THREE.OBJLoader(); // Usa il loader OBJ
       let model;
-      loader.load("MODELLO_TESI_EDO.gltf", function (gltf) {
-        model = gltf.scene;
+      loader.load("MODELLO_TESI_EDO.obj", function (obj) {
+        model = obj;
         model.scale.set(2, 2, 2);
         scene.add(model);
 
@@ -71,20 +72,16 @@
       window.addEventListener("mousemove", onMouseMove, false);
 
       function onMouseMove(event) {
-        // Normalizza le coordinate del mouse
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       }
 
       function onMouseClick(event) {
-        // Imposta il raycaster con la posizione del mouse
         raycaster.updateMatrixWorld();
         raycaster.setFromCamera(mouse, camera);
 
-        // Controlla le intersezioni con il modello
         let intersects = raycaster.intersectObject(model);
         if (intersects.length > 0) {
-          // Se c'è un'intersezione (cioè il clic è sul modello), apri il PDF
           window.open("TESI_PIAZZOLLA_577068_v1.pdf", "_blank");
         }
       }
