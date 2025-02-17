@@ -3,14 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<<<<<<< HEAD
     <title>
       Congratulazioni Edoardo! - Tesi di Laurea Triennale in Ingegneria
       Informatica
     </title>
-=======
-    <title>Congratulazioni Edoardo! - Tesi di Laurea Triennale in Ingegneria Informatica</title>
->>>>>>> 7e0dbd27fead3165f66d09172ab159a850b0ea8e
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <style>
@@ -30,11 +26,23 @@
         border-radius: 8px;
         z-index: 2;
       }
+      #overlay-image {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        /* Adjust size as needed */
+        width: 200px; /* Change this value to resize your image */
+        height: auto; /* This maintains aspect ratio */
+        pointer-events: none; /* This allows clicks to pass through to the 3D object */
+      }
     </style>
   </head>
   <body>
     <div id="scene-container"></div>
     <div id="click-instruction">Clicca sul modello 3D per aprire la tesi</div>
+
     <script>
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf5f5f5);
@@ -111,6 +119,7 @@
             color: 0xe0e0e0,
             roughness: 0.7,
             metalness: 0.1,
+            map: paperTexture,
           });
 
           // Pages material (grigio chiaro con texture)
@@ -118,7 +127,6 @@
             color: 0x154c79,
             roughness: 0.8,
             metalness: 0,
-            map: paperTexture,
           });
 
           let meshCounter = 0;
