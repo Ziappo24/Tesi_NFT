@@ -22,13 +22,14 @@
         text-decoration: none;
         font-family: Arial, sans-serif;
         border-radius: 5px;
+        z-index: 2; /* Per renderlo sopra il 3D */
       }
     </style>
   </head>
   <body>
-    <a id="pdf-link" href="TESI_PIAZZOLLA_577068_v1.pdf" target="_blank"
-      >📄 Apri il PDF</a
-    >
+    <a id="pdf-link" href="TESI_PIAZZOLLA_577068_v1.pdf" target="_blank">
+      📄 Apri il PDF
+    </a>
     <script>
       let scene = new THREE.Scene();
       let camera = new THREE.PerspectiveCamera(
@@ -46,8 +47,9 @@
       scene.add(light);
 
       let loader = new THREE.GLTFLoader();
+      let model;
       loader.load("MODELLO_TESI_EDO.gltf", function (gltf) {
-        let model = gltf.scene;
+        model = gltf.scene;
         model.scale.set(2, 2, 2);
         scene.add(model);
 
@@ -60,6 +62,32 @@
       });
 
       camera.position.z = 5;
+
+      // Funzione per il raycasting
+      let raycaster = new THREE.Raycaster();
+      let mouse = new THREE.Vector2();
+
+      window.addEventListener("click", onMouseClick, false);
+      window.addEventListener("mousemove", onMouseMove, false);
+
+      function onMouseMove(event) {
+        // Normalizza le coordinate del mouse
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      }
+
+      function onMouseClick(event) {
+        // Imposta il raycaster con la posizione del mouse
+        raycaster.updateMatrixWorld();
+        raycaster.setFromCamera(mouse, camera);
+
+        // Controlla le intersezioni con il modello
+        let intersects = raycaster.intersectObject(model);
+        if (intersects.length > 0) {
+          // Se c'è un'intersezione (cioè il clic è sul modello), apri il PDF
+          window.open("TESI_PIAZZOLLA_577068_v1.pdf", "_blank");
+        }
+      }
 
       window.addEventListener("resize", () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
