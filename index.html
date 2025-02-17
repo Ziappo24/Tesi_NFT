@@ -3,42 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      Congratulazioni Edoardo! - Laurea Triennale in Ingegneria Informatica
-    </title>
+    <title>Congratulazioni Edoardo!</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <style>
       body {
         margin: 0;
         overflow: hidden;
-        background: #ffffff;
-        font-family: Arial, sans-serif;
-      }
-      #scene-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      #pdf-link {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        padding: 12px 20px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: background 0.3s ease;
-        z-index: 2;
-      }
-      #pdf-link:hover {
-        background: rgba(0, 0, 0, 0.9);
+        background: #f5f5f5;
       }
       #click-instruction {
         position: absolute;
@@ -55,13 +27,10 @@
   </head>
   <body>
     <div id="scene-container"></div>
-    <a id="pdf-link" href="TESI_PIAZZOLLA_577068_v1.pdf" target="_blank">
-      📄 Apri il PDF
-    </a>
     <div id="click-instruction">Clicca sul modello 3D per aprire la tesi</div>
     <script>
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xffffff);
+      scene.background = new THREE.Color(0xf5f5f5);
 
       const camera = new THREE.PerspectiveCamera(
         60,
@@ -69,29 +38,59 @@
         0.1,
         1000
       );
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
 
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       document
         .getElementById("scene-container")
         .appendChild(renderer.domElement);
 
-      // Enhanced lighting setup
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+      // Improved lighting for better depth
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambientLight);
 
-      const frontLight = new THREE.DirectionalLight(0xffffff, 1);
-      frontLight.position.set(0, 0, 5);
+      const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      frontLight.position.set(5, 5, 5);
+      frontLight.castShadow = true;
       scene.add(frontLight);
 
-      const backLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      backLight.position.set(0, 0, -5);
+      const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
+      backLight.position.set(-5, -5, -5);
       scene.add(backLight);
 
-      const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      topLight.position.set(0, 5, 0);
-      scene.add(topLight);
+      // Create procedural texture for pages
+      const createPaperTexture = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext("2d");
+
+        // Fill with light gray
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fillRect(0, 0, 512, 512);
+
+        // Add subtle noise for paper texture
+        for (let i = 0; i < 50000; i++) {
+          const x = Math.random() * 512;
+          const y = Math.random() * 512;
+          const gray = 220 + Math.random() * 20;
+          ctx.fillStyle = `rgb(${gray},${gray},${gray})`;
+          ctx.fillRect(x, y, 1, 1);
+        }
+
+        return new THREE.CanvasTexture(canvas);
+      };
+
+      const paperTexture = createPaperTexture();
+
+      const modelGroup = new THREE.Group();
+      scene.add(modelGroup);
 
       let model;
       const loader = new THREE.OBJLoader();
@@ -100,31 +99,44 @@
         function (obj) {
           model = obj;
 
-          // Add material to make the model more visible
+          // Cover material (blu scuro #154c79)
+          const coverMaterial = new THREE.MeshStandardMaterial({
+            color: 0xe0e0e0,
+            roughness: 0.7,
+            metalness: 0.1,
+          });
+
+          // Pages material (grigio chiaro con texture)
+          const pagesMaterial = new THREE.MeshStandardMaterial({
+            color: 0x154c79,
+            roughness: 0.8,
+            metalness: 0,
+            map: paperTexture,
+          });
+
+          let meshCounter = 0;
           obj.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-              child.material = new THREE.MeshPhongMaterial({
-                color: 0x2194ce,
-                specular: 0x494949,
-                shininess: 30,
-              });
+              child.material =
+                meshCounter % 2 === 0 ? coverMaterial : pagesMaterial;
+              child.castShadow = true;
+              child.receiveShadow = true;
+              meshCounter++;
             }
           });
 
-          // Adjust scale if needed
-          model.scale.set(1.5, 1.5, 1.5);
-
-          // Center the model
           const box = new THREE.Box3().setFromObject(model);
           const center = box.getCenter(new THREE.Vector3());
-          model.position.sub(center);
-
-          scene.add(model);
-
-          // Adjust camera position based on model size
           const size = box.getSize(new THREE.Vector3());
+
+          model.position.sub(center);
+          modelGroup.add(model);
+
           const maxDim = Math.max(size.x, size.y, size.z);
-          camera.position.z = maxDim * 2;
+          const scale = 3 / maxDim;
+          modelGroup.scale.set(scale, scale, scale);
+
+          camera.position.z = 5;
         },
         undefined,
         function (error) {
@@ -132,11 +144,9 @@
         }
       );
 
-      // Raycasting setup
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
 
-      // Mouse events
       window.addEventListener("click", onMouseClick);
       window.addEventListener("mousemove", onMouseMove);
 
@@ -155,17 +165,15 @@
         }
       }
 
-      // Animation
       function animate() {
         requestAnimationFrame(animate);
-        if (model) {
-          model.rotation.y += 0.005;
+        if (modelGroup) {
+          modelGroup.rotation.y += 0.005;
         }
         renderer.render(scene, camera);
       }
       animate();
 
-      // Responsive handling
       window.addEventListener("resize", () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
