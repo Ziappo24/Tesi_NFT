@@ -8,7 +8,7 @@
       Informatica
     </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
       body {
         margin: 0;
@@ -108,38 +108,21 @@
       scene.add(modelGroup);
 
       let model;
-      const loader = new THREE.OBJLoader();
+      const loader = new THREE.GLTFLoader();
       loader.load(
-        "MODELLO_TESI_EDO.obj",
-        function (obj) {
-          model = obj;
+        "def_3d.gltf", // Replace with your GLTF file path
+        function (gltf) {
+          model = gltf.scene;
 
-          // Cover material (blu scuro #154c79)
-          const coverMaterial = new THREE.MeshStandardMaterial({
-            color: 0xe0e0e0,
-            roughness: 0.7,
-            metalness: 0.1,
-            map: paperTexture,
-          });
-
-          // Pages material (grigio chiaro con texture)
-          const pagesMaterial = new THREE.MeshStandardMaterial({
-            color: 0x154c79,
-            roughness: 0.8,
-            metalness: 0,
-          });
-
-          let meshCounter = 0;
-          obj.traverse(function (child) {
+          // Enable shadows for all meshes
+          model.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-              child.material =
-                meshCounter % 2 === 0 ? coverMaterial : pagesMaterial;
               child.castShadow = true;
               child.receiveShadow = true;
-              meshCounter++;
             }
           });
 
+          // Center and scale the model
           const box = new THREE.Box3().setFromObject(model);
           const center = box.getCenter(new THREE.Vector3());
           const size = box.getSize(new THREE.Vector3());
@@ -153,12 +136,13 @@
 
           camera.position.z = 5;
         },
-        undefined,
+        function (xhr) {
+          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        },
         function (error) {
-          console.error("Errore nel caricamento del modello:", error);
+          console.error("Error loading model:", error);
         }
       );
-
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
 
