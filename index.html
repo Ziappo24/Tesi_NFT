@@ -176,7 +176,8 @@
 
       window.addEventListener("click", onMouseClick);
       window.addEventListener("mousemove", onMouseMove);
-
+      window.addEventListener("touchend", onMouseClick);
+      window.addEventListener("click", onMouseClick);
       function onMouseMove(event) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -187,7 +188,7 @@
           raycaster.setFromCamera(mouse, camera);
           const intersects = raycaster.intersectObject(model, true);
           if (intersects.length > 0) {
-            window.open("TESI_PIAZZOLLA_577068_v1.pdf", "_blank");
+            window.location.href = "./TESI_PIAZZOLLA_577068_v1.pdf";
           }
         }
       }
