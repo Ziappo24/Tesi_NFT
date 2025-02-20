@@ -35,16 +35,37 @@
     <script>
       const scene = new THREE.Scene();
       /********************************************/
-      /******* SFONDO STELLATO ********************/
+      /******* FOTO BACKGROUND ********************/
       /********************************************/
 
       // Carica la texture delle stelle
 
-      const textureLoader = new THREE.TextureLoader();
-      const starTexture = textureLoader.load("int_1.png"); // Assicurati che l'immagine sia nella stessa cartella del tuo script o con il giusto percorso
+      // const textureLoader = new THREE.TextureLoader();
+      // const starTexture = textureLoader.load("int_1.png"); // Assicurati che l'immagine sia nella stessa cartella del tuo script o con il giusto percorso
 
       // Assegna la texture direttamente al background della scena
-      scene.background = starTexture;
+      // scene.background = starTexture;
+      /********************************************/
+
+      /********************************************/
+      /******* VIDEO BACKGROUND********************/
+      /********************************************/
+      const video = document.createElement("video");
+      video.src = "int_2.mp4"; // Percorso del video
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true; // Necessario per l'autoplay su mobile
+      video.playsInline = true;
+      video.play();
+
+      // Creazione della texture dal video
+      const videoTexture = new THREE.VideoTexture(video);
+      videoTexture.minFilter = THREE.LinearFilter;
+      videoTexture.magFilter = THREE.LinearFilter;
+      videoTexture.format = THREE.RGBFormat;
+
+      // Imposta il video come sfondo della scena
+      scene.background = videoTexture;
       /********************************************/
 
       const camera = new THREE.PerspectiveCamera(
