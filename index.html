@@ -182,6 +182,13 @@
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       }
+      document.addEventListener(
+        "click",
+        () => {
+          video.play();
+        },
+        { once: true }
+      ); // Parte solo al primo tap
 
       function onMouseClick() {
         if (model) {
