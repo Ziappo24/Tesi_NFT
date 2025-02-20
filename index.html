@@ -17,25 +17,14 @@
       }
       #click-instruction {
         position: absolute;
-        bottom: 20px;
+        bottom: 50px;
         left: 50%;
         transform: translateX(-50%);
-        padding: 10px 20px;
+        padding: 10px 10px;
         background: rgba(0, 0, 0, 0.7);
         color: white;
         border-radius: 8px;
         z-index: 2;
-      }
-      #overlay-image {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1000;
-        /* Adjust size as needed */
-        width: 200px; /* Change this value to resize your image */
-        height: auto; /* This maintains aspect ratio */
-        pointer-events: none; /* This allows clicks to pass through to the 3D object */
       }
     </style>
   </head>
@@ -45,7 +34,18 @@
 
     <script>
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf5f5f5);
+      /********************************************/
+      /******* SFONDO STELLATO ********************/
+      /********************************************/
+
+      // Carica la texture delle stelle
+
+      const textureLoader = new THREE.TextureLoader();
+      const starTexture = textureLoader.load("interstellar_2.png"); // Assicurati che l'immagine sia nella stessa cartella del tuo script o con il giusto percorso
+
+      // Assegna la texture direttamente al background della scena
+      scene.background = starTexture;
+      /********************************************/
 
       const camera = new THREE.PerspectiveCamera(
         60,
@@ -78,6 +78,11 @@
       const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
       backLight.position.set(-5, -5, -5);
       scene.add(backLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 2); // Colore bianco, intensità 2
+      directionalLight.position.set(0, 5, 10); // Posizionata davanti al modello
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
 
       // Create procedural texture for pages
       const createPaperTexture = () => {
@@ -119,6 +124,8 @@
             if (child instanceof THREE.Mesh) {
               child.castShadow = true;
               child.receiveShadow = true;
+              child.material.metalness = 0.5; // Riduci il valore di metallicità
+              child.material.roughness = 0.8; // Aumenta la rugosità per evitare riflessi speculari
             }
           });
 
